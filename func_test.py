@@ -10,9 +10,6 @@
 
 
 import logging
-import numpy as np
-import xlwings as xw
-
 
 
 if __name__ == '__main__':
@@ -22,14 +19,6 @@ if __name__ == '__main__':
         datefmt='%Y-%m-%d %H:%M:%S')
     logging.debug('start DEBUG')
     logging.debug('==========================================================')
-
-    from pathlib import Path
-    from main import stop_refresh
-    from main import start_refresh
-    filepath = Path.cwd().joinpath('test_data\\change_minus')
-    testfile = str(filepath.joinpath('change_test.xlsx'))
-    stop_refresh()
-    start_refresh()
 
     logging.debug('==========================================================')
     logging.debug('end DEBUG')

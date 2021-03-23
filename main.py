@@ -3,8 +3,8 @@
 '''
 @File    :   main.py
 @Author  :   Billy Zhou
-@Time    :   2020/03/03
-@Version :   1.1.0
+@Time    :   2020/03/23
+@Version :   1.2.0
 @Desc    :   None
 '''
 
@@ -13,10 +13,11 @@ import logging
 import xlwings as xw
 import pandas as pd
 from func_basic import search_file_by_type
-from func_basic import sheet_seacrh
+from func_basic_excel_sht import sheet_seacrh
+from func_basic_excel_sht import excel_range_func
+from func_change_minus import array_change_minus
+from func_cleansing import array_regex_cleansing
 from func_copy import copy_and_paste
-from func_change_minus import excel_change_minus
-from func_cleansing import excel_cleansing
 
 
 def stop_refresh():
@@ -43,6 +44,25 @@ def to_csv(filetype=".xlsx"):
                 pd.read_excel(
                     file_path, index_col=0).to_csv(
                     csv_file_path, encoding='utf-8-sig')
+
+
+def num_clean(
+        point_exist=True, point_digit=2, point_overflow_accept=False):
+    # change input value to text by format "@"
+    # take care of the max value of the float64 type
+    if point_exist and point_digit > 0:
+        num_format = "#,##0." + "0" * point_digit
+    else:
+        num_format = "#,##0"
+    excel_range_func(
+        excel_func=array_regex_cleansing, pre_format=num_format,
+        point_exist=point_exist, point_digit=point_digit,
+        point_overflow_accept=point_overflow_accept
+        )
+
+
+def change_minus():
+    excel_range_func(excel_func=array_change_minus)
 
 
 def sum_sheets(
@@ -132,15 +152,6 @@ def sum_sheets(
                             ignore_row_num, close_after_copy=True)
 
 
-def num_clean(
-        point_exist=True, point_digit=2, point_overflow_accept=False):
-    excel_cleansing(point_exist, point_digit, point_overflow_accept)
-
-
-def change_minus():
-    excel_change_minus()
-
-
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO,
@@ -159,16 +170,37 @@ if __name__ == '__main__':
     # to_csv(filetype=".xlsx")
     # to_csv(filetype=".xls")
 
+    # test for excel_cleaning
+
+    # filepath = Path.cwd().joinpath('test_data\\cleansing')
+    # testfile = str(filepath.joinpath('regex_test.xlsx'))
+    # xw.Book(testfile).set_mock_caller()
+    # stop_refresh()
+    # num_clean(
+    #     point_exist=True, point_digit=2, point_overflow_accept=False)
+    # start_refresh()
+
+    # test for change_minus
+
+    # filepath = Path.cwd().joinpath('test_data\\change_minus')
+    # testfile = str(filepath.joinpath('change_test.xlsx'))
+    # xw.Book(testfile).set_mock_caller()
+    # stop_refresh()
+    # change_minus()
+    # start_refresh()
+
     # test for sum_sheets
 
     filepath = Path.cwd().joinpath('test_data\\sum_sheets')
     testfile = str(filepath.joinpath('sum_test.xlsx'))
     xw.Book(testfile).set_mock_caller()
+    stop_refresh()
     sum_sheets(
         ignore_row_num=0, current_book=False, f_type=".csv",
         copy_first_sheet=True,
         target_sheet1=False, target_same_sheetname=False
     )
+    start_refresh()
 
     logging.debug('==========================================================')
     logging.debug('end DEBUG')

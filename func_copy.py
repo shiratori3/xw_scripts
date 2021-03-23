@@ -11,9 +11,9 @@
 
 import logging
 import xlwings as xw
-from func_basic import sheet_seacrh
-from func_basic import address_getnum
-from func_basic import address_getheight
+from func_basic_excel_sht import sheet_seacrh
+from func_basic_excel_cell import address_getnum
+from func_basic_excel_cell import address_getheight
 
 
 def copy_and_paste(

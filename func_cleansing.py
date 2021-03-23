@@ -12,9 +12,7 @@
 import logging
 import re
 import numpy as np
-import xlwings as xw
 from func_basic import count_sum
-from func_basic import selected_range
 from func_basic import dict_append
 
 
@@ -164,66 +162,6 @@ def file_cleansing(
                 f_uncleaned.write(cleaned_data_f[i] + "\n")
 
 
-def excel_cleansing(
-        point_exist=True, point_digit=2, point_overflow_accept=False):
-    # num format
-    if point_exist and point_digit > 0:
-        num_format = "#,##0." + "0" * point_digit
-    else:
-        num_format = "#,##0"
-    wb = xw.books.active
-    sht = wb.sheets.active
-    # change input value to text by format "@"
-    # take care of the max value of the float64 type
-    wb.app.selection.number_format = num_format
-    cell_selected = wb.app.selection
-
-    # turn data to data_list
-    logging.debug(cell_selected.value)
-    cell_selected_np = cell_selected.options(np.array, ndim=2, empty='').value
-    logging.debug(cell_selected_np)
-    logging.debug(cell_selected_np.shape)
-    data_list = list(cell_selected_np.flat)
-    success_list, failure_list = array_regex_cleansing(
-        data_list, point_exist, point_digit, point_overflow_accept)
-    logging.debug("success: %s", success_list)
-    logging.warning("failure: %s", failure_list)
-
-    # set the format of text cell
-    text_range = []
-    x = 0
-    for row in range(0, cell_selected_np.shape[0]):
-        for col in range(0, cell_selected_np.shape[1]):
-            x += 1
-            cleaned_data = success_list[x-1]
-            if cleaned_data:
-                logging.debug("value: %s" % (cleaned_data))
-                logging.debug("type: %s" % (type(cleaned_data)))
-                cell_row = cell_selected.row + row
-                cell_col = cell_selected.column + col
-                cell_range = (cell_row, cell_col)
-
-                if isinstance(cleaned_data, np.float64):
-                    pass
-                elif isinstance(cleaned_data, np.str_):
-                    text_range.append(cell_range)
-                elif len(cleaned_data) > 17:
-                    text_range.append(cell_range)
-    logging.debug(text_range)
-    for r in text_range:
-        sht.range(r).number_format = "@"
-
-    data_array = np.array(success_list).reshape(
-        cell_selected_np.shape[0], cell_selected_np.shape[1])
-
-    # put cleaned data to cell
-    cell_start, cell_end = selected_range(cell_selected)
-    cell_region = cell_start + ":" + cell_end
-    logging.debug("data_array: %s" % data_array)
-    logging.debug("cell_region: %s" % cell_region)
-    sht.range(cell_region).value = data_array
-
-
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO,
@@ -256,19 +194,6 @@ if __name__ == '__main__':
     #     testfile, destfile_s, destfile_f,
     #     point_exist=True, point_digit=4,
     #     point_overflow_accept=True, drop_fail=True)
-
-    # test for excel_cleaning
-    from pathlib import Path
-    from main import stop_refresh
-    from main import start_refresh
-    filepath = Path.cwd().joinpath('test_data\\cleansing')
-    testfile = str(filepath.joinpath('regex_test.xlsx'))
-    xw.Book(testfile).set_mock_caller()
-    # remeber to select the data for cleansing
-    stop_refresh()
-    excel_cleansing(
-        point_exist=True, point_digit=2, point_overflow_accept=False)
-    start_refresh()
 
     logging.debug('==========================================================')
     logging.debug("end DEBUG")

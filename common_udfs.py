@@ -17,35 +17,6 @@ from main import to_csv
 from main import sum_sheets
 from main import change_minus
 
-"""
-      Maybe you will have problem to import udfs into xlsm file, just as below:
-
- Error 
- --------------------------- 
- Original error was: DLL load failed while importing _multiarray_umath: 鎵句笉鍒版寚瀹?an existing issue about this - open a new one instead. 
- Note: this error has many possible causes, so please don't comment on 
-   (removes all files not under version control) and rebuild numpy. 
- - If you're working with a numpy git repository, try `git clean -xdf` 
-      - if you built from source, your compiler versions and ideally a build log 
-      - whether or not you have multiple versions of Python installed 
-      - your operating system 
-      - how you installed numpy 
-      - how you installed Python 
-      https://github.com/numpy/numpy/issues.  Please include details on: 
-   2. If (1) looks fine, you can open a new issue at 
-      interfere with the Python and numpy version "1.18.1" you're trying to use. 
-      and that you have no directories in your PATH or PYTHONPATH that can 
-   1. Check that you expected to use Python3.8 from "D:\Miniconda3\envs\pyexcel\pythonw.exe", 
- - If you have already done that, then: 
- - Try uninstalling and r 
- --------------------------- 
- 确定    
- --------------------------- 
-
-      This's a numpy import error with mkl_XXX.dll missing.
-      When this happen, add ...\Miniconda3\envs\env_name\Library\bin to system path, and then try to reinstall numpy. 
-""" # noqa
-
 
 @xw.sub
 def merge_current_sheet():
