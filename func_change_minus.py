@@ -39,7 +39,7 @@ def array_change_minus(data_list):
                 if num_line:
                     if not isinstance(num_line, str):
                         dict_append(
-                            dict_out, "Num", str(num_line*-1), "", 'DEBUG')
+                            dict_out, "Num", str(num_line * -1), "", 'DEBUG')
                     else:
                         dict_append(
                             dict_out, "Str", line, line, 'INFO')

@@ -67,7 +67,7 @@ def excel_range_func(
         for row in range(0, selected_range_np.shape[0]):
             for col in range(0, selected_range_np.shape[1]):
                 x += 1
-                cleaned_data = success_list[x-1]
+                cleaned_data = success_list[x - 1]
                 if cleaned_data:
                     logging.debug("value: %s" % (cleaned_data))
                     logging.debug("type: %s" % (type(cleaned_data)))

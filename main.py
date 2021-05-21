@@ -58,7 +58,7 @@ def num_clean(
         excel_func=array_regex_cleansing, pre_format=num_format,
         point_exist=point_exist, point_digit=point_digit,
         point_overflow_accept=point_overflow_accept
-        )
+    )
 
 
 def change_minus():

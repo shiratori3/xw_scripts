@@ -106,7 +106,7 @@ def array_regex_cleansing(
                                         result_list.append(
                                             group_num[:-point_digit] + "." +
                                             group_num[-point_digit:]
-                                            )
+                                        )
                                     else:
                                         result_list.append(group_num)
 

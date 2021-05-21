@@ -3,8 +3,8 @@
 '''
 @File    :   common_udfs.py
 @Author  :   Billy Zhou
-@Time    :   2021/03/03
-@Version :   1.2.0
+@Time    :   2021/05/21
+@Version :   1.3.0
 @Desc    :   None
 '''
 
@@ -16,6 +16,39 @@ from main import num_clean
 from main import to_csv
 from main import sum_sheets
 from main import change_minus
+
+import hashlib
+import numpy as np
+
+
+# @xw.arg('data', 'range')
+@xw.func
+@xw.arg('data', ndim=2, numbers=str, empty='')
+def MDF_SINGLE(data):
+    data_joined = ''.join(list(np.array(data).flatten()))
+    md5_str = hashlib.md5(data_joined.encode(encoding='UTF-8')).hexdigest()
+
+    return md5_str
+
+
+@xw.func
+@xw.arg('data', ndim=2, numbers=str, empty='')
+@xw.ret(expand='table')
+def MDF(data, debug_flag=False):
+    print(data)
+    data_array = np.array(data)
+    data_list = list(data_array.flatten())
+    data_list_md5 = []
+    for i, datum in enumerate(data_list):
+        data_list_md5.append(hashlib.md5(datum.encode(encoding='UTF-8')).hexdigest())
+
+    data_array_md5 = np.array(data_list_md5).reshape(data_array.shape)
+    print(data_array_md5)
+
+    if debug_flag:
+        return data_array
+    else:
+        return data_array_md5
 
 
 @xw.sub
@@ -122,6 +155,8 @@ def num_change_minus():
 
 
 if __name__ == '__main__':
+    xw.serve()
+
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(name)s %(levelname)s %(message)s',

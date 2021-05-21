@@ -31,7 +31,7 @@ def range_get_cell_start_to_end(selected_range):
 
 def col_num2alpha(col_min, col_max):
     col_alpha = {}
-    for i in range(col_min, col_max+1):
+    for i in range(col_min, col_max + 1):
         col_alpha[i] = num_to_ascii(i)
     logging.debug("col_alpha: %s" % col_alpha)
     return col_alpha
@@ -52,7 +52,7 @@ def num_to_ascii(num, digits=0, b=26, string_ABC=""):
     else:
         digits = + 1
         return num_to_ascii(
-            num//b, digits, b, ascii_uppercase[num % b - 1] + string_ABC)
+            num // b, digits, b, ascii_uppercase[num % b - 1] + string_ABC)
 
 
 def address_getheight(address):
