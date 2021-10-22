@@ -4,7 +4,10 @@
 
 1. 函数：
 
-    - 单元格MD5计算（MDF、MDF_SINGLE）
+    - 单元格MD5计算（udf_md5、udf_md5_single）
+    - 抽样（udf_sample）
+    - 分配（udf_arrange、udf_arrange_multi）
+    - 抽样分配（udf_sample_arrange）-待实现
 
 2. marco（宏）：
 
@@ -15,14 +18,29 @@
 
 ### 函数功能介绍
 
-- 单元格MD5计算（MDF、MDF_SINGLE）
+- 单元格MD5计算（udf_md5、udf_md5_single）
 
 > __注意：由于转换器的设置，整数数值会自动变成带.0的浮点数，会导致MD5数值与原值有差异。使用时请留意是否包含整数以免出现计算差异__
 >
 > 当前支持：
 >
-> 1. MDF_SINGLE：将整个区域的单元格的值按顺序合并起来计算其MD5数值，并返还单个MD5数值。
-> 2. MDF：计算整个区域中的各个单元格值的MD5值，并返回对应的MD5数组。
+> 1. udf_md5_single：将整个区域的单元格的值按顺序合并起来计算并返回其MD5数值。
+> 2. udf_md5：计算整个区域中的各个单元格值的MD5值（空格也会纳入计算），并返回对应的MD5数组。
+
+- 抽样（udf_sample）
+
+> __注意，返回值为数组公式，重新打开文件后会发生变更，因此需要把对应结果复制至其他区域或粘贴为值。__
+>
+> 当前支持：
+>
+> 1. udf_sample：根据指定的抽样区域及抽样大小返回对应布尔数组结果。
+
+- 分配（udf_arrange、udf_arrange_multi）
+
+> 当前支持：
+>
+> 1. udf_arrange：根据指定的名称及对应数量返回对应名称列表。
+> 2. udf_arrange_multi：根据指定的名称、任务名及对应数量返回对应名称数组。
 
 ### 宏功能介绍
 
@@ -74,3 +92,14 @@
     # 现有宏名称及对应功能
     change_selected_sign # 变更选中区域的数值的正负号
     change_selected_sign_preformat_text # 先把区域格式变为数值再变更选中区域的数值的正负号
+
+
+## todo list
+
+1. 函数：
+
+    - 抽样分配（udf_sample_arrange）
+
+2. marco（宏）：
+
+    - 暂无
