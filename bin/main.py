@@ -19,7 +19,7 @@ from src.func.md5 import udf_md5  # noqa: F401
 from src.func.md5 import udf_md5_single  # noqa: F401
 from src.func.sample import udf_sample  # noqa: F401
 from src.func.arrange import udf_arrange  # noqa: F401
-from src.func.arrange import udf_arrange_mutli  # noqa: F401
+from src.func.arrange import udf_arrange_multi  # noqa: F401
 from src.marco.range_marco import change_selected_sign  # noqa: F401
 from src.marco.range_marco import change_selected_sign_preformat_text  # noqa: F401
 from src.marco.range_marco import clean_num_with2dec_round  # noqa: F401

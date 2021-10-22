@@ -49,7 +49,7 @@ def udf_arrange(names, nums_to_arrange):
 @xw.arg('tasks', np.array, ndim=1, numbers=str, empty='', doc='Select the range of tasks you want to arrange for')
 @xw.arg('nums_to_arrange', np.array, numbers=str, ndim=2, empty=0, transpose=True, doc='Select the range of arrange nums')
 @xw.ret(expand='table', transpose=True)
-def udf_arrange_mutli(names, tasks, nums_to_arrange):
+def udf_arrange_multi(names, tasks, nums_to_arrange):
     if names.shape[0] * tasks.shape[0] != nums_to_arrange.shape[0] * nums_to_arrange.shape[1]:
         return 'Incorrect input. The product of the num of names and tasks is diff from the num of nums_to_arrange'
     else:
