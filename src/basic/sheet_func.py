@@ -50,7 +50,7 @@ def sheet_seacrh(
     """
     sht_target_list = []
     original_sht_name_list = [sht.name for sht in wb.sheets]
-    log.debug("sht_name_list: {}".format(sht_name_list))
+    print("sht_name_list: {}".format(sht_name_list))
     for sht_name in sht_name_list:
         sht_target = None
         if sht_name not in original_sht_name_list:
@@ -193,7 +193,8 @@ def sum_sheets(
 
     # select current active sheet or "Sheet1" or sheet[0] as default target sheet
     sht_target = sheet_seacrh(
-        wb_active, ['Sheet1'], return_first=True) if not target_cur_sht else wb_active.sheets.active
+        wb_active, ['Sheet1'], return_first=True)[0] if not target_cur_sht else wb_active.sheets.active
+    print(sht_target)
     target_shts_dict = {}
     target_shts_dict[0] = sht_target
 
