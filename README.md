@@ -4,12 +4,11 @@
 
 1. 函数：
 
-    - 单元格MD5计算（udf_md5、udf_md5_single）
-    - 抽样（udf_sample）
-    - 分配（udf_arrange、udf_arrange_multi）
-    - 抽样分配（udf_sample_arrange）-待实现
+    - 单元格MD5计算（udf_md5_single、udf_md5）
+    - 分配（udf_assign、udf_assign_multi）
+    - 抽样（udf_sample、udf_sample_assign）
 
-2. marco（宏）：
+2. 宏：
 
     - merge：合并工作表
     - to_csv：批量转换为csv文件
@@ -18,14 +17,40 @@
 
 ### 函数功能介绍
 
-- 单元格MD5计算（udf_md5、udf_md5_single）
+- 单元格MD5计算（udf_md5_single、udf_md5）
 
 > __注意：由于转换器的设置，整数数值会自动变成带.0的浮点数，会导致MD5数值与原值有差异。使用时请留意是否包含整数以免出现计算差异__
 >
 > 当前支持：
 >
 > 1. udf_md5_single：将整个区域的单元格的值按顺序合并起来计算并返回其MD5数值。
+>    - 参数：
+>       - data: 需要合并计算md5值的区域
+>    - 返回值：
+>       - md5: 单个数值，为data区域的所有值的合并字符串的md5值
 > 2. udf_md5：计算整个区域中的各个单元格值的MD5值（空格也会纳入计算），并返回对应的MD5数组。
+>    - 参数：
+>       - data: 需要合并计算md5值的区域
+>    - 返回值：
+>       - range_md5: 数组公式，其范围大小与data一致，其中每个单元格的值为data对应区域的值的字符串的md5值
+
+- 分配（udf_assign、udf_assign_multi）
+
+> 当前支持：
+>
+> 1. udf_assign：根据指定的名称及对应数量返回对应名称列表。
+>    - 参数：
+>       - names: 需要分配任务的名称
+>       - nums_to_assign: 需要分配任务的名称对应的分配量
+>    - 返回值：
+>       - name_list: 数组公式，一维名称列表，其行数等于nums_to_assign总和，值为按names顺序填充nums_to_assign次names对应字符串的字符串列表。
+> 2. udf_assign_multi：根据指定的名称、任务名及对应数量返回对应名称数组。
+>    - 参数：
+>       - names: 需要分配任务的名称
+>       - tasks: 需要分配的任务类型
+>       - nums_to_assign: 需要分配任务的名称对应的分配量
+>    - 返回值：
+>       - task_name_list: 数组公式，两列多行的二维名称列表，其行数等于nums_to_assign总和，首列的值为按tasks顺序填充nums_to_assign次tasks对应字符串的字符串列表，第二列的值为按tasks、names顺序填充nums_to_assign次names对应字符串的字符串列表。
 
 - 抽样（udf_sample）
 
@@ -34,13 +59,23 @@
 > 当前支持：
 >
 > 1. udf_sample：根据指定的抽样区域及抽样大小返回对应布尔数组结果。
-
-- 分配（udf_arrange、udf_arrange_multi）
-
-> 当前支持：
+>    - 参数：
+>       - data: 需要抽样的范围
+>       - sample_num: 抽样个数或百分比，录入需为正整数或0~1之间的小数
+>    - 返回值：
+>       - sample_array: 数组公式，一维布尔数组，大小与data行数一致，其中True的个数根据sample_num计算得出。
+>           - sample_num大于data行数则返回错误提示文字。
+>           - sample_num为0~1之间的小数：True个数为sample_num乘以data行数后舍去小数位
+>           - sample_num为正整数：True个数为sample_num。
 >
-> 1. udf_arrange：根据指定的名称及对应数量返回对应名称列表。
-> 2. udf_arrange_multi：根据指定的名称、任务名及对应数量返回对应名称数组。
+> 2. udf_sample_assign：根据指定的抽样区域、分配名称及分配量返回对应名称数组结果。
+>    - 参数：
+>       - data: 需要抽样的范围
+>       - names: 需要分配抽样任务的名称
+>       - nums_to_assign: 需要分配抽样任务的名称对应的分配量
+>    - 返回值：
+>       - sample_name_list: 数组公式，一维名称列表，大小与data行数一致，默认值为空，并按names顺序随机填充nums_to_assign次names中的对应字符串。
+>           - nums_to_assign总和大于data行数则返回错误提示文字。
 
 ### 宏功能介绍
 
@@ -98,8 +133,8 @@
 
 1. 函数：
 
-    - 抽样分配（udf_sample_arrange）
+    - 暂无
 
-2. marco（宏）：
+2. 宏：
 
     - 暂无

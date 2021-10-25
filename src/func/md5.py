@@ -25,6 +25,7 @@ import xlwings as xw
 @xw.func
 @xw.arg('data', ndim=2, numbers=str, empty='')
 def udf_md5_single(data):
+    """Return a md5 of the combination of data"""
     data_joined = ''.join(list(np.array(data).flatten()))
     return hashlib.md5(data_joined.encode(encoding='UTF-8')).hexdigest()
 
@@ -33,6 +34,7 @@ def udf_md5_single(data):
 @xw.arg('data', ndim=2, numbers=str, empty='')
 @xw.ret(expand='table')
 def udf_md5(data):
+    """Return a list of md5 of the each cells in the range of data"""
     data_array = np.array(data)
     md5_data_list = list(map(lambda x: hashlib.md5(x.encode(encoding='UTF-8')).hexdigest(), data_array.flatten()))
     return np.array(md5_data_list).reshape(data_array.shape)
