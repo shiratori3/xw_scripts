@@ -52,7 +52,8 @@ def try_expect_stop_refresh(func):
 if __name__ == '__main__':
     # test for search_file_by_type
     import time
-    testfile = cwdPath.joinpath('res\\dev\\to_csv').joinpath('test.xlsx')
+    testpath = cwdPath.joinpath('res\\dev\\to_csv')
+    testfile = testpath.joinpath('test_to_csv.xlsx')
     xw.Book(testfile).set_mock_caller()
     stop_refresh()
     time.sleep(10)
