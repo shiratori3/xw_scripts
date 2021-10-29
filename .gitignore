@@ -7,9 +7,9 @@
 /conf/
 /conf/rsa/
 /conf/conn/
-*.yaml
 /log/
 *.log
+usrpath_backup_*.txt
 /res/pro/
 /bin/*.py
 !template.*

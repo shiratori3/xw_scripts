@@ -23,12 +23,12 @@
 >
 > 当前支持：
 >
-> 1. udf_md5_single：将整个区域的单元格的值按顺序合并起来计算并返回其MD5数值。
+> 1. udf_md5_single(data)：将整个区域的单元格的值按顺序合并起来计算并返回其MD5数值。
 >    - 参数：
 >       - data: 需要合并计算md5值的区域
 >    - 返回值：
 >       - md5: 单个数值，为data区域的所有值的合并字符串的md5值
-> 2. udf_md5：计算整个区域中的各个单元格值的MD5值（空格也会纳入计算），并返回对应的MD5数组。
+> 2. udf_md5(data)：计算整个区域中的各个单元格值的MD5值（空格也会纳入计算），并返回对应的MD5数组。
 >    - 参数：
 >       - data: 需要合并计算md5值的区域
 >    - 返回值：
@@ -38,13 +38,13 @@
 
 > 当前支持：
 >
-> 1. udf_assign：根据指定的名称及对应数量返回对应名称列表。
+> 1. udf_assign(names, nums_to_assign)：根据指定的名称及对应数量返回对应名称列表。
 >    - 参数：
 >       - names: 需要分配任务的名称
 >       - nums_to_assign: 需要分配任务的名称对应的分配量
 >    - 返回值：
 >       - name_list: 数组公式，一维名称列表，其行数等于nums_to_assign总和，值为按names顺序填充nums_to_assign次names对应字符串的字符串列表。
-> 2. udf_assign_multi：根据指定的名称、任务名及对应数量返回对应名称数组。
+> 2. udf_assign_multi(names, tasks, nums_to_assign)：根据指定的名称、任务名及对应数量返回对应名称数组。
 >    - 参数：
 >       - names: 需要分配任务的名称
 >       - tasks: 需要分配的任务类型
@@ -58,7 +58,7 @@
 >
 > 当前支持：
 >
-> 1. udf_sample：根据指定的抽样区域及抽样大小返回对应布尔数组结果。
+> 1. udf_sample(data, sample_num)：根据指定的抽样区域及抽样大小返回对应布尔数组结果。
 >    - 参数：
 >       - data: 需要抽样的范围
 >       - sample_num: 抽样个数或百分比，录入需为正整数或0~1之间的小数
@@ -68,7 +68,7 @@
 >           - sample_num为0~1之间的小数：True个数为sample_num乘以data行数后舍去小数位
 >           - sample_num为正整数：True个数为sample_num。
 >
-> 2. udf_sample_assign：根据指定的抽样区域、分配名称及分配量返回对应名称数组结果。
+> 2. udf_sample_assign(data, names, nums_to_assign, to_distinct = True, col_index = 0)：根据指定的抽样区域、分配名称及分配量返回对应名称数组结果。
 >    - 参数：
 >       - data: 需要抽样的范围
 >       - names: 需要分配抽样任务的名称
@@ -127,7 +127,6 @@
     # 现有宏名称及对应功能
     change_selected_sign # 变更选中区域的数值的正负号
     change_selected_sign_preformat_text # 先把区域格式变为数值再变更选中区域的数值的正负号
-
 
 ## todo list
 

@@ -78,8 +78,6 @@ def udf_sample_assign(data, names, nums_to_assign, to_distinct: bool = False, co
                     num = int(float(n))
                     sample_row_num += num
                     name_assign.extend([name] * num)
-            if sample_row_num > data.shape[0]:
-                return 'Error. The sum of nums_to_assign is bigger than the row num of data'
         except ValueError as e:
             log.error('An error occurred. {}'.format(e.args[-1]))
             return 'Invaild input values of nums_to_assign. Failed to convert the value of nums_to_assign to float'
@@ -94,10 +92,13 @@ def udf_sample_assign(data, names, nums_to_assign, to_distinct: bool = False, co
             else:
                 data_org = data.copy()
                 data = data.drop_duplicates(subset=[col_index])[col_index]
-                print(data[:10])
         except ValueError as e:
             log.error('An error occurred. {}'.format(e.args[-1]))
             return 'Invaild input values of col_index. Failed to convert col_index to float'
+
+    # check the vaild of row num
+    if sample_row_num > data.shape[0]:
+        return 'Error. The sum of nums_to_assign is bigger than the row num of data'
 
     # generate a random array
     rng = default_rng()
