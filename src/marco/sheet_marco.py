@@ -17,7 +17,7 @@ from src.manager.LogManager import logmgr
 log = logmgr.get_logger(__name__)
 
 import xlwings as xw
-from src.basic.sheet_func import sum_sheets
+from src.utils.sheet import sum_sheets
 
 
 @xw.sub
@@ -75,7 +75,7 @@ def merge_xlsx_first_sheet_to_diff_sheets_with_bookname():
 
 
 if __name__ == '__main__':
-    from src.basic.sheet_func import sheet_seacrh
+    from src.utils.sheet import sheet_seacrh
 
     if False:
         # test for sum_sheets
