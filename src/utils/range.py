@@ -17,7 +17,7 @@ from src.manager.LogManager import logmgr  # noqa: E402
 log = logmgr.get_logger(__name__)
 
 from xlwings import Range
-from src.basic.app_func import try_expect_stop_refresh
+from src.utils.app import try_expect_stop_refresh
 from src.handler.RangeSignChange import RangeSignChange
 from src.handler.RangeNumClean import RangeNumClean
 

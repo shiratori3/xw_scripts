@@ -17,8 +17,12 @@ from src.manager.LogManager import logmgr
 log = logmgr.get_logger(__name__)
 
 import time
+import yaml
 import shlex
-from subprocess import check_output, Popen, PIPE, STDOUT, TimeoutExpired
+import shutil
+from subprocess import check_output
+from src.utils.setup import proc_run
+from src.utils.input_check import input_checking_YN
 
 
 def find_conda_path(folder_keyword: str = 'conda') -> Path:
@@ -116,31 +120,111 @@ def check_conda_env(env_name: str):
     return conda_env_status
 
 
-def create_conda_env(env_name: str, configfile: Path):
-    if check_conda_env(env_name):
-        print(f'Conda environment[{env_name}] already exists')
+def check_conda_settings(usr_folder: Path, force_to_cover: bool = True):
+    """check and update settings in .condarc file"""
+    def copy_default():
+        src = cwdPath.joinpath(r'res\dev\.condarc')
+        shutil.copy2(src, conda_settings)
+        print(f'settings_file[{src}] copied to [{conda_settings}].')
+
+    conda_settings = Path(usr_folder).joinpath('.condarc')
+    if not conda_settings.exists():
+        copy_default()
     else:
+        # init
+        def_channels = [
+            'https://mirrors.bfsu.edu.cn/anaconda/pkgs/main',
+            'https://mirrors.bfsu.edu.cn/anaconda/pkgs/r',
+            'https://mirrors.bfsu.edu.cn/anaconda/pkgs/msys2'
+        ]
+        cus_channels = {
+            'conda-forge': 'https://mirrors.bfsu.edu.cn/anaconda/cloud',
+            'msys2': 'https://mirrors.bfsu.edu.cn/anaconda/cloud',
+            'bioconda': 'https://mirrors.bfsu.edu.cn/anaconda/cloud',
+            'menpo': 'https://mirrors.bfsu.edu.cn/anaconda/cloud',
+            'pytorch': 'https://mirrors.bfsu.edu.cn/anaconda/cloud',
+            'simpleitk': 'https://mirrors.bfsu.edu.cn/anaconda/cloud'
+        }
+
+        print(f'settings_file[{conda_settings}] already exists.')
+        with open(conda_settings, 'r') as f:
+            settings = yaml.load(f.read(), Loader=yaml.Loader)
+        log.debug(f'settings before checked: {settings}')
+        if settings is None:
+            copy_default()
+        elif not isinstance(settings, dict):
+            raise TypeError(f'Error type[{type(settings)}] of settings file.')
+        else:
+            # check value of show_channel_urls
+            if isinstance(settings.get('show_channel_urls', None), bool):
+                if not settings['show_channel_urls']:
+                    settings['show_channel_urls'] = True
+
+            # check value of channels
+            if isinstance(settings.get('channels', None), list):
+                if 'defaults' not in settings['channels']:
+                    settings['channels'].append('defaults')
+            else:
+                settings['channels'] = ['defaults']
+
+            # check value of default_channels
+            if isinstance(settings.get('default_channels', None), list):
+                for ch in def_channels:
+                    if ch not in settings['default_channels']:
+                        settings['default_channels'].append(ch)
+            else:
+                settings['default_channels'] = def_channels
+
+            # check value of custom_channels
+            if isinstance(settings.get('custom_channels', None), dict):
+                for alias in cus_channels.keys():
+                    if alias not in settings['custom_channels'].keys():
+                        settings['custom_channels'][alias] = cus_channels[alias]
+                    else:
+                        if force_to_cover:
+                            settings['custom_channels'][alias] = cus_channels[alias]
+                        else:
+                            tips = "Change the custom channel[{}] from \n   value[{}] \nto value[{}]".format(
+                                alias, settings['custom_channels'][alias], cus_channels[alias]
+                            )
+                            if input_checking_YN(tips, default_Y=False) == 'Y':
+                                settings['custom_channels'][alias] = cus_channels[alias]
+                                print('Changed.')
+                            else:
+                                print('Canceled.')
+            else:
+                settings['custom_channels'] = cus_channels
+
+        log.debug(f'settings after checked: {settings}')
+        # update conda settings file
+        if settings is not None:
+            with open(conda_settings, 'w') as f:
+                yaml.dump(settings, f, Dumper=yaml.Dumper)
+
+
+def create_conda_env(env_name: str, configfile: Path, force_to_install: bool = False):
+    """create conda env named env_name from configfile"""
+    def install(env_name, configfile):
         print(f'Installing the conda env[{env_name}]. It might takes a few minutes...')
         install_cmd = 'conda.bat env create -f "{}"'.format(str(configfile).replace('\\', '/'))
-        proc = Popen(shlex.split(install_cmd), stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-        while True:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            print(line.decode('utf-8').rstrip())
+        proc_run(install_cmd)
+
+    # clean cache to make sure to use the updated channels
+    for line in check_output(shlex.split('conda.bat clean -i')).decode('utf-8').split('\n'):
+        print(line)
+
+    status = check_conda_env(env_name)
+    if status:
+        print(f'Conda environment[{env_name}] already exists')
+    if not status:
+        install(env_name, configfile)
+    elif force_to_install:
+        remove_conda_env(env_name, force_to_remove=True)
+        install(env_name, configfile)
 
 
 def remove_conda_env(env_name: str, force_to_remove: bool = False):
-    def terminated_read(stdout, terminators: str) -> str:
-        buf = []
-        while True:
-            if stdout.readable():
-                r = stdout.read(1).decode('utf-8')
-                # print(r)
-                buf.append(r)
-                if r in terminators:
-                    break
-        return "".join(buf)
+    """remove conda env named env_name"""
 
     if not check_conda_env(env_name):
         print(f'Conda environment[{env_name}] not exists')
@@ -150,23 +234,13 @@ def remove_conda_env(env_name: str, force_to_remove: bool = False):
             remove_cmd = 'conda.bat remove -y -n "{}" --all'.format(env_name)
         else:
             remove_cmd = 'conda.bat remove -n "{}" --all'.format(env_name)
-        print(shlex.split(remove_cmd))
-        proc = Popen(shlex.split(remove_cmd), stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-        try:
-            while True:
-                line = terminated_read(proc.stdout, "\n?")
-                print(line.rstrip())
-                if not line:
-                    break
-                elif line.rstrip() == 'Proceed ([y]/n)?':
-                    proc.stdin.write(input().encode('utf-8'))
-                    proc.stdin.close()
-        except TimeoutExpired:
-            print('Time out. Kill the process')
-            proc.kill()
+        proc_run(remove_cmd, break_lines=['Proceed ([y]/n)?'])
 
 
 if __name__ == '__main__':
+    import os
+    usr_folder = Path(os.path.expanduser('~'))
+
     if True:
         conda_basepath = find_conda_path(folder_keyword='conda')
         print(f"conda_basepath: {conda_basepath}")
@@ -176,9 +250,13 @@ if __name__ == '__main__':
 
     if False:
         print(check_conda_env('pyexcel'))
+        print(check_conda_env('testconda'))
 
     if False:
-        create_conda_env('testconda', cwdPath.joinpath('res/dev/testconda.yaml'))
+        check_conda_settings(usr_folder, force_to_cover=True)
+
+    if False:
+        create_conda_env('testconda', cwdPath.joinpath('res/dev/testconda.yaml'), force_to_install=True)
 
     if False:
         add_conda_path(conda_basepath.joinpath('envs/testconda'), path_overflow=True)

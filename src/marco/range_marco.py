@@ -17,8 +17,8 @@ from src.manager.LogManager import logmgr
 log = logmgr.get_logger(__name__)
 
 import xlwings as xw
-from src.basic.range_func import change_sign
-from src.basic.range_func import clean_num
+from src.utils.range import change_sign
+from src.utils.range import clean_num
 
 
 @xw.sub

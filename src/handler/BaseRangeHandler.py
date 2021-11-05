@@ -20,7 +20,7 @@ import numpy as np
 import xlwings as xw
 from xlwings import Range
 from decimal import Decimal
-from src.basic.cell_func import num2alpha
+from src.utils.cell import num2alpha
 
 
 class BaseRangeHandler(object):

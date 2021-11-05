@@ -14,7 +14,7 @@ sys.path.append(str(cwdPath))
 
 
 import xlwings as xw
-from src.basic.utils import to_csv  # noqa: F401
+from src.utils.basic import to_csv  # noqa: F401
 from src.func.assignment import udf_assign  # noqa: F401
 from src.func.assignment import udf_assign_multi  # noqa: F401
 from src.func.md5 import udf_md5  # noqa: F401

@@ -20,7 +20,7 @@ import numpy as np
 from typing import Any
 from xlwings import Range
 from decimal import Decimal
-from src.basic.cell_func import str2num
+from src.utils.cell import str2num
 from src.handler.BaseCellHandler import break_where
 from src.handler.BaseCellHandler import BaseCellHandler
 from src.handler.BaseRangeHandler import BaseRangeHandler
