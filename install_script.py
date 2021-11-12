@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # find the basepath of conda
     conda_basepath = find_conda_path(folder_keyword='conda')
 
-    if False:
+    if True:
         # check and add conda_basepath to sys path
         add_conda_path(conda_basepath)
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         check_conda_settings(usr_folder, force_to_cover=True)
 
         # check and create conda env named pyexcel
-        create_conda_env('pyexcel', cwdPath.joinpath('requirements_conda_pyexcel_win.yaml'), force_to_install=True)
+        create_conda_env('pyexcel', cwdPath.joinpath('requirements_conda_pyexcel_win64.yaml'), force_to_install=True)
 
         # check and add pyexcel to sys path
         add_conda_path(conda_basepath.joinpath('envs\\pyexcel'))

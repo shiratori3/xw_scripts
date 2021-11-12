@@ -51,63 +51,78 @@ def check_conda_bat(conda_basepath: Path, add_path: bool = True):
             raise FileNotFoundError("conda.bat is not in sys path. Please add it manually")
 
 
-def add_conda_path(conda_basepath: Path, path_overflow: bool = False, show_sys_path: bool = False):
-    """add the paths under conda_basepath to sys_path"""
-    # check conda path in sys_path or not
-    path_to_add = ''
+def add_conda_path(conda_path: Path, path_overflow: bool = False, show_sys_path: bool = False):
+    """add the paths under conda_path to sys_path"""
+    # check conda path in path or not
+    # get current paths
+    all_path_lower = []
+    # get sys paths
     sys_path = check_output(shlex.split('echo %path%'), shell=True).decode('utf-8').split(';')
     sys_path_lower = [p.rstrip().lower() for p in sys_path]
     if show_sys_path:
         print(f'win_path_lower: {sys_path_lower}')
+    all_path_lower.extend(sys_path_lower)
+    # get usr paths
+    usr_path_org = ''
+    get_usr_path_cmd = 'reg query HKEY_CURRENT_USER\\Environment'
+    # get_usr_path_cmd = 'powershell -NoProfile -Command "(Get-ItemProperty HKCU:\\Environment).PATH"'
+    for line in check_output(get_usr_path_cmd, shell=True).decode('utf-8').strip().split('\n'):
+        if 'Path    REG_SZ' in line.strip():
+            usr_path_org = line.strip()[len('Path    REG_SZ    '):]
+        elif 'Path    REG_EXPAND_SZ' in line.strip():
+            usr_path_org = line.strip()[len('Path    REG_EXPAND_SZ    '):]
+    usr_path_lower = [p.rstrip().lower() for p in usr_path_org.split(';')]
+    if show_sys_path:
+        print(f'usr_path_lower: {usr_path_lower}')
+    all_path_lower.extend(usr_path_lower)
+
+    # check which subpath need to add
+    path_to_add = ''
     for subpath in ['', 'Scripts', r'Library\bin']:
-        conda_path = Path(conda_basepath).joinpath(subpath)
-        if not conda_path.exists():
-            print('Path[{}] not exists'.format(conda_path))
+        p = Path(conda_path).joinpath(subpath)
+        if not p.exists():
+            print(f'Path[{p}] not exists')
         else:
-            if str(conda_path).lower() not in sys_path_lower:
-                path_to_add += str(conda_path) + ';'
-                print('Path[{}] wait to add'.format(str(conda_path)))
+            if str(p).lower() not in all_path_lower:
+                path_to_add += str(p) + ';'
+                print(f'Path[{p}] wait to add')
             else:
-                print('Path[{}] already in sys_path'.format(conda_path))
+                print(f'Path[{p}] already in sys_path')
 
     if path_to_add:
-        # get usr_path
-        usr_path_to_backup = ''
-        get_usr_path_cmd = 'reg query HKEY_CURRENT_USER\\Environment'
-        # get_usr_path_cmd = 'powershell -NoProfile -Command "(Get-ItemProperty HKCU:\\Environment).PATH"'
-        for line in check_output(get_usr_path_cmd, shell=True).decode('utf-8').strip().split('\n'):
-            if 'Path    REG_SZ' in line.strip():
-                usr_path_to_backup = line.strip()[len('Path    REG_SZ    '):]
-            elif 'Path    REG_EXPAND_SZ' in line.strip():
-                usr_path_to_backup = line.strip()[len('Path    REG_EXPAND_SZ    '):]
+        # del the last ; in path
+        if path_to_add[-1] == ';':
+            path_to_add = path_to_add[:-1]
+        if usr_path_org[-1] == ';':
+            usr_path_org = usr_path_org[:-1]
 
-        if not usr_path_to_backup:
-            print('Failed to get the usr path variable')
+        if not usr_path_org:
+            print('Failed to get current usr path variable')
         else:
-            print("Your usr path in usr variables: \n{}".format(usr_path_to_backup))
-            # backup the usr path to file
+            print(f"Your usr path in usr variables: \n{usr_path_org}")
+            # backup current usr path to file
             filename = cwdPath.joinpath('usrpath_backup_{}.txt'.format(time.strftime(
                 '%Y%m%d%H%M%S', time.localtime())))
             with open(filename, 'w', encoding='utf-8') as f:
-                f.write(usr_path_to_backup)
-                print(f'The usr path is saved to {filename}')
+                f.write(usr_path_org)
+                print(f'Current usr path is saved to {filename}')
 
             # check the length of paths
-            if len(usr_path_to_backup) + len(path_to_add) > 1024:
-                print(f'The len of usr_path is {len(usr_path_to_backup)}.')
+            if len(usr_path_org) + len(path_to_add) > 1024:
+                print(f'The len of usr_path is {len(usr_path_org)}.')
                 print(f'The len of path_to_add is {len(path_to_add)}.')
                 if not path_overflow:
                     raise OverflowError(
                         'The len of path to write is over 1024. Please add path[{}] to env manually'.format(
-                            path_to_add[:-1]))
+                            path_to_add))
                 else:
                     print('Froce to write sys_path in usr variables. The overflow part will be truncated.')
-            if usr_path_to_backup[-1] == ';':
-                usr_path_to_backup = usr_path_to_backup[:-1]
-            add_result = check_output(f'setx path "{usr_path_to_backup};{path_to_add[:-1]}"', shell=True).decode('utf-8')
-            print(add_result.strip())
+
+            # combine path_to_add and usr_path_org, then set the result as usr path
+            add_result = check_output(f'setx path "{usr_path_org};{path_to_add}"', shell=True)
+            print(add_result.decode('gbk').strip())
             usr_path = check_output(get_usr_path_cmd, shell=True).decode('utf-8').strip()
-            print("Path[{}] added to usr path".format(path_to_add[:-1]))
+            print("Path[{}] added to usr path".format(path_to_add))
             print("Your usr variables now are: \n{}".format(usr_path.strip()))
 
 
@@ -132,6 +147,7 @@ def check_conda_settings(usr_folder: Path, force_to_cover: bool = True):
         copy_default()
     else:
         # init
+        # change download sources to bfsu mirrors
         def_channels = [
             'https://mirrors.bfsu.edu.cn/anaconda/pkgs/main',
             'https://mirrors.bfsu.edu.cn/anaconda/pkgs/r',
@@ -183,7 +199,7 @@ def check_conda_settings(usr_folder: Path, force_to_cover: bool = True):
                     else:
                         if force_to_cover:
                             settings['custom_channels'][alias] = cus_channels[alias]
-                        else:
+                        elif settings['custom_channels'][alias] != cus_channels[alias]:
                             tips = "Change the custom channel[{}] from \n   value[{}] \nto value[{}]".format(
                                 alias, settings['custom_channels'][alias], cus_channels[alias]
                             )
